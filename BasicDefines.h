@@ -19,4 +19,7 @@ typedef struct
 	bool enabled;
 } ButtonEntry;
 
+#define LEFT_DRIVE_PWM 0
+#define RIGHT_DRIVE_PWM 1
+
 #endif

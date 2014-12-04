@@ -102,285 +102,48 @@ public:
 // TOP menu
 // ----------------------------------------------------------------------------
 
-class TopMenu : public BaseMenu
-{
-	
-public:
-	TopMenu ();
-	
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     UpdateDisplay ();
-private:
-	menuType HandleSelect ();
-};
-
 // ----------------------------------------------------------------------------
 // SOLENOID menu
 // ----------------------------------------------------------------------------
-
-#define MIN_SOLENOID_CHANNEL 0
-#define MAX_SOLENOID_CHANNEL 7
-
-typedef enum {
-	SINGLE,
-	DUAL
-} modeType;
-
-class SolenoidMenu : public BaseMenu
-{
-	
-public:
-	         SolenoidMenu ();
-	virtual ~SolenoidMenu();
-	
-	void     doIndexUp ();
-	void     doIndexDown ();
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     SwitchMode();
-	void     UpdateDisplay ();
-	
-	int        mode_m;
-	int        currentChannelNumA_m;
-	int        currentChannelNumB_m;
-	Solenoid * channel_mp[MAX_SOLENOID_CHANNEL + 1];
-	DoubleSolenoid * doubleSolenoid_mp;
-};
 
 // ----------------------------------------------------------------------------
 // ANALOG menu
 // ----------------------------------------------------------------------------
 
-#define MIN_ANALOG_CHANNEL 0
-// The last channel is always used for batt voltage so we do not have 
-// access to it (hence our max channel is 6 not 7)
-#define MAX_ANALOG_CHANNEL 6 
-
-class AnalogMenu : public BaseMenu
-{
-	
-public:
-	         AnalogMenu ();
-	virtual ~AnalogMenu();
-	
-	void     doIndexUp ();
-	void     doIndexDown ();
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     UpdateDisplay ();
-	
-	int             currentChannelNum_m;
-	AnalogChannel * channel_mp[MAX_ANALOG_CHANNEL + 1];
-};
-
 // ----------------------------------------------------------------------------
 // A class to handle the digital IO ports for the DIGITAL_* menus
 // ----------------------------------------------------------------------------
-
-#define NUM_DIO_CHANNELS 14
-#define MIN_DIO_CHANNEL  0
-
-// To get around the fact that we do not have a common base class through which
-// we can have a single pointer to point to either an input or an output we have
-// one for each direction as follows:
-// 	Direction DigitalInput DigitalOutput
-//	  Input     NonNULL        Null
-//	  Output     NULL         NonNULL
-
-typedef struct {
-	DigitalInput  * DigitalInput_p;
-	DigitalOutput * DigitalOutput_p;
-} DigitalIOEntry;
-
-class DigitalIO
-{
-public:
-	DigitalIO ();
-	~DigitalIO ();
-	
-	bool IsInput (int channel);
-	void SetToInput (int channel, bool input);
-	bool GetValue (int channel);
-	void SetValue (int channel, bool value);
-	
-	DigitalSource * GetInputPointer (int channel);
-
-	static DigitalIO * GetInstance ();
-	
-private:
-	static DigitalIO * instance_m;
-	
-	DigitalIOEntry DIOTable_mp[NUM_DIO_CHANNELS];
-};
 
 // ----------------------------------------------------------------------------
 // DIGITAL_TOP menu
 // ----------------------------------------------------------------------------
 
-class DigitalMenu : public BaseMenu
-{
-	
-public:
-	DigitalMenu ();
-	
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     UpdateDisplay ();
-};
-
 // ----------------------------------------------------------------------------
 // DIGITAL_PWM menu
 // ----------------------------------------------------------------------------
-
-#define MIN_PWM_CHANNEL 0
-#define MAX_PWM_CHANNEL 9
-
-class PWMMenu : public BaseMenu
-{
-typedef enum {
-	NEITHER,
-	A_ONLY,
-	B_ONLY,
-	BOTH
-} enabledType;
-
-public:
-	         PWMMenu ();
-	virtual ~PWMMenu();
-	
-	void     doIndexUp ();
-	void     doIndexDown ();
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     UpdateDisplay ();
-	
-	void SetSpeed (float speed);
-	
-	int currentChannelNumA_m;
-	int currentChannelNumB_m;
-	int enabled_m;
-	
-	Jaguar * channel_mp[MAX_PWM_CHANNEL + 1];
-};
 
 // ----------------------------------------------------------------------------
 // DIGITAL_IO menu
 // ----------------------------------------------------------------------------
 
-class DigitalIOMenu : public BaseMenu
-{
-	
-public:
-	DigitalIOMenu ();
-	
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     UpdateDisplay ();
-};
-
 // ----------------------------------------------------------------------------
 // RELAY menu
 // ----------------------------------------------------------------------------
-
-#define MIN_RELAY_CHANNEL 0
-#define MAX_RELAY_CHANNEL 7
-
-class RelayMenu : public BaseMenu
-{
-	
-public:
-	         RelayMenu ();
-	virtual ~RelayMenu();
-	
-	void     doIndexUp ();
-	void     doIndexDown ();
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     UpdateDisplay ();
-	
-	void IncrementChannelValue ();
-	void DecrementChannelValue ();
-	int  RelayValueToInt (Relay::Value value);
-
-	
-	int          currentChannelNum_m;
-	Relay::Value currentChannelValue_m;
-	Relay *      channel_mp[MAX_RELAY_CHANNEL + 1];
-};
 
 // ----------------------------------------------------------------------------
 // Digital IO State menu
 // ----------------------------------------------------------------------------
 
-class DigitalIOStateMenu : public BaseMenu
-{	
-public:
-	         DigitalIOStateMenu ();
-	virtual ~DigitalIOStateMenu();
-	
-	void     doIndexUp ();
-	void     doIndexDown ();
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     UpdateDisplay ();
-	
-	int  currentChannelNum_m;
-	bool currentChannelValue_m;
-	
-	DigitalIO * digitalIO_mp;
-};
-
 // ----------------------------------------------------------------------------
 // DIGITAL_IO_ENCODER menu
 // ----------------------------------------------------------------------------
-
-class DigitalIOEncoderMenu : public BaseMenu
-{
-public:
-	         DigitalIOEncoderMenu ();
-	virtual ~DigitalIOEncoderMenu();
-	
-	void     doIndexUp ();
-	void     doIndexDown ();
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     UpdateDisplay ();
-	
-	void CreateAndStartEncoder();
-	void StopAndDestroyEncoder();
-
-	int currentChannelNumA_m;
-	int currentChannelNumB_m;
-	
-	Encoder *   encoder_mp;
-	DigitalIO * digitalIO_mp;
-};
 
 // ----------------------------------------------------------------------------
 // DIGITAL_IO_CLOCK menu
 // ----------------------------------------------------------------------------
 
-class DigitalIOClockMenu : public BaseMenu
-{
-public:
-	         DigitalIOClockMenu ();
-	virtual ~DigitalIOClockMenu();
-	
-	void     doIndexUp ();
-	void     doIndexDown ();
-	menuType HandleSelectLeft ();
-	menuType HandleSelectRight ();
-	void     UpdateDisplay ();
-	
-	void CreateAndStartCounter();
-	void StopAndDestroyCounter();
-
-	int currentChannelNum_m;
-	
-	Counter *   counter_mp;
-	DigitalIO * digitalIO_mp;
-};
+#define NUM_DIO_CHANNELS 14
+#define MIN_DIO_CHANNEL  0
 
 #endif
 
