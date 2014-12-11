@@ -31,12 +31,14 @@ class RobotDemo : public SimpleRobot
 {
 	EGamepad          gamepad;   // for test mode
 	DriverStationLCD *dsLCD;
+	Controls		 *controls;
 
 public:
 	RobotDemo(void) :
 		gamepad(3)
 	{
 		dsLCD = DriverStationLCD::GetInstance();
+		controls = Controls::GetInstance();
 
 		// Output the program name and build date/time in the hope that this will help
 		// us catch cases where we are downloading a program other than the one
@@ -73,9 +75,18 @@ public:
 		// Loop counter to ensure that the program is running (debug helper
 		// that can be removed when things get more stable)
 		int sanity, bigSanity = 0;
+		
+		gamepad.Update();
 
 		while (IsOperatorControl() && IsEnabled())
 		{
+			controls = Controls::GetInstance();
+			
+			controls->SetSpeed(LEFT_DRIVE_PWM, -1.0 * gamepad.GetRightY());
+			controls->SetSpeed(RIGHT_DRIVE_PWM, -1.0 * gamepad.GetRightY());
+			
+			gamepad.Update();
+			
 			dsLCD->Clear();
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "2013 Test Fix");
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Teleop Mode");
@@ -87,10 +98,7 @@ public:
 				bigSanity++;
 			}
 
-			Controls::controlsInstance->SetSpeed(LEFT_DRIVE_PWM, 1.0 * gamepad.GetRightY());
-			Controls::controlsInstance->SetSpeed(RIGHT_DRIVE_PWM, -1.0 * gamepad.GetRightY());
-
-			Wait(0.005);				// wait for a motor update time
+			Wait(0.05);				// wait for a motor update time
 		}
 	}
 

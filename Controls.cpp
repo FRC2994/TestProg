@@ -1,9 +1,9 @@
 #include "Controls.h"
 
+Controls * Controls::instance = NULL;
+
 Controls::Controls()
 {
-	this->controlsInstance = new Controls();
-
 	for (int i = MIN_PWM_CHANNEL; i <= MAX_PWM_CHANNEL; i++)
 	{
 		channel_mp[i] = new Jaguar(i + 1);
@@ -18,19 +18,24 @@ Controls::~Controls()
 	{
 		delete channel_mp[i];
 	}
+	instance = NULL;
+}
 
-	delete this->controlsInstance;
+Controls * Controls::GetInstance()
+{
+	if(instance == NULL)
+	{
+		instance = new Controls();
+	}
+	return instance;
 }
 
 void Controls::SetSpeed(int channel, float speed)
 {
-	if (speed != 0.0)
+	if(activeChannels[channel] == false)
 	{
-		if (activeChannels[channel] == false)
-		{
-			activeChannels[channel] = true;
-			channel_mp[channel]->Set(speed);
-		}
+		channel_mp[channel]->Set(speed);
+		activeChannels[channel] = true;
 	}
 	else
 	{

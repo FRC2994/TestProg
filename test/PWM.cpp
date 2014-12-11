@@ -20,6 +20,8 @@ PWMMenu::PWMMenu()
 	currentChannelNumA_m = 0;
 	currentChannelNumB_m = 1;
 	enabled_m = NEITHER;
+	
+	controls = Controls::GetInstance();
 
 
 	// Create a PWM object for every channel on the module
@@ -143,38 +145,17 @@ void PWMMenu::SetSpeed(float speed)
 
 	if (BOTH == enabled_m) // Reverse order cuz of glitchy stuff to make sure you dont goof up
 	{
-		Controls::controlsInstance->SetSpeed(currentChannelNumA_m, speed);
-		Controls::controlsInstance->SetSpeed(currentChannelNumB_m, speed);
+		controls->SetSpeed(currentChannelNumA_m, speed);
+		controls->SetSpeed(currentChannelNumB_m, speed);
 	}
 	else if (A_ONLY == enabled_m)
 	{
-		Controls::controlsInstance->SetSpeed(currentChannelNumA_m, speed);
+		controls->SetSpeed(currentChannelNumA_m, speed);
 	}
 	else if (B_ONLY == enabled_m)
 	{
-		Controls::controlsInstance->SetSpeed(currentChannelNumB_m, speed);
+		controls->SetSpeed(currentChannelNumB_m, speed);
 	}
-
-	//	bool alreadySet = false;
-	//	for (int i = MIN_PWM_CHANNEL; i <= MAX_PWM_CHANNEL; i++)
-	//	{
-	//		alreadySet = false;
-	//		if ((i == currentChannelNumA_m) && ((A_ONLY == enabled_m) || (BOTH == enabled_m)))
-	//		{
-	//			channel_mp[i]->Set(speed);
-	//			alreadySet = true;
-	//		}
-	//		if ((i == currentChannelNumB_m) && ((B_ONLY == enabled_m) || (BOTH == enabled_m)))
-	//		{
-	//			channel_mp[i]->Set(speed);
-	//			alreadySet = true;
-	//		}
-	//
-	//		if (!alreadySet)
-	//		{
-	//			channel_mp[i]->Set(0.0);
-	//		}
-	//	}
 }
 
 void PWMMenu::UpdateDisplay()
@@ -191,8 +172,8 @@ void PWMMenu::UpdateDisplay()
 
 	dsLCD->Clear();
 	dsLCD->PrintfLine(LCD1, "PWM");
-	dsLCD->PrintfLine(LCD2, " Channel A: %d %5.2f", chanA, Controls::controlsInstance->GetSpeed(currentChannelNumA_m));
-	dsLCD->PrintfLine(LCD3, " Channel B: %d %5.2f", chanB, Controls::controlsInstance->GetSpeed(currentChannelNumB_m));
+	dsLCD->PrintfLine(LCD2, " Channel A: %d %5.2f", chanA, controls->GetSpeed(currentChannelNumA_m));
+	dsLCD->PrintfLine(LCD3, " Channel B: %d %5.2f", chanB, controls->GetSpeed(currentChannelNumB_m));
 	dsLCD->PrintfLine(LCD4, " Enabled: %s", enabledStrings[enabled_m]);
 	dsLCD->PrintfLine(LCD5, " Back");
 	dsLCD->Printf(IndexToLCDLine(index_m), 1, "*");

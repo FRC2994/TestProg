@@ -9,8 +9,9 @@
 class Controls
 {
 public:
-	Controls();
 	virtual ~Controls();
+	
+	static Controls * GetInstance();
 	
 	void SetSpeed(int channel, float speed);
 	float GetSpeed(int channel);
@@ -18,8 +19,11 @@ public:
 	Jaguar * channel_mp[MAX_PWM_CHANNEL + 1];
 	bool activeChannels[MAX_PWM_CHANNEL + 1];
 	
-public:
-	static Controls * controlsInstance;
+protected:
+	Controls();
+	
+private:
+	static Controls * instance;
 };
 
 #endif // CONTROLS_H_

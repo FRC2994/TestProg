@@ -28,6 +28,8 @@ public:
 	int currentChannelNumA_m;
 	int currentChannelNumB_m;
 	int enabled_m;
+	
+	Controls * controls; // Temp
 };
 
 #endif
