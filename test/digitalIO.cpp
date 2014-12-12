@@ -1,4 +1,4 @@
-#include "base.h"
+#include "digitalIO.h"
 
 DigitalIO * DigitalIO::instance_m = NULL;
 

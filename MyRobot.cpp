@@ -1,12 +1,27 @@
 #include "WPILib.h"
 #include "EGamepad.h"
-#include "test/base.h"
+
+#include "test/digitalIO.h"			// TEMP
+#include "test/digitalMenu.h"		// TEMP
+#include "test/topMenu.h"			// TEMP
+#include "test/PWM.h"				// TEMP
+#include "test/solenoid.h"			// TEMP
+#include "test/analog.h"			// TEMP
+#include "test/relay.h"				// TEMP
+#include "test/digitalIOMenu.h"		// TEMP
+#include "test/digitalIOState.h"	// TEMP
+#include "test/digitalIOEncoder.h"	// TEMP
+#include "test/digitalIOClock.h"	// TEMP
+
+#include "Controls.h"				// Slightly less temp I think
+#include "BasicDefines.h"			// Same as this
+
 /**
- * This is a demo program showing the use of the RobotBase class.
- * The SimpleRobot class is the base of a robot application that will automatically call your
- * Autonomous and OperatorControl methods at the right time as controlled by the switches on
- * the driver station or the field controls.
- */ 
+* This is a demo program showing the use of the RobotBase class.
+* The SimpleRobot class is the base of a robot application that will automatically call your
+* Autonomous and OperatorControl methods at the right time as controlled by the switches on
+* the driver station or the field controls.
+*/
 
 // This demo progam has been modified to include code that runs in test mode. The intent of this
 // code is to enable the manipulation of individual channels on any of the modules using a menu-
@@ -16,19 +31,21 @@ class RobotDemo : public SimpleRobot
 {
 	EGamepad          gamepad;   // for test mode
 	DriverStationLCD *dsLCD;
+	Controls		 *controls;
 
 public:
-	RobotDemo(void):
+	RobotDemo(void) :
 		gamepad(3)
 	{
 		dsLCD = DriverStationLCD::GetInstance();
-		
+		controls = Controls::GetInstance();
+
 		// Output the program name and build date/time in the hope that this will help
 		// us catch cases where we are downloading a program other than the one
 		// we think we are downloading. Keep in mind that if this source file
 		// does not change (and you don't do a complete rebuild) the timestamp
 		// will not change.
-		
+
 		dsLCD->Clear();
 		dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "2013 Test Menu");
 		dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, __DATE__ " "__TIME__);
@@ -36,10 +53,10 @@ public:
 	}
 
 	/**
-	 * Output a message to the LCD to let users know they have strayed
-	 * into a useless mode
-	 */
-	
+	* Output a message to the LCD to let users know they have strayed
+	* into a useless mode
+	*/
+
 	void Autonomous(void)
 	{
 		dsLCD->Clear();
@@ -49,18 +66,27 @@ public:
 	}
 
 	/**
-	 * Output a message to the LCD to let users know they have strayed
-	 * into a useless mode
-	 */
-	
-	void OperatorControl(void)
+	* Output a message to the LCD to let users know they have strayed
+	* into a useless mode
+	*/
+
+	void OperatorControl()
 	{
-		// Loop counter to ensure that the program us running (debug helper
+		// Loop counter to ensure that the program is running (debug helper
 		// that can be removed when things get more stable)
 		int sanity, bigSanity = 0;
+		
+		gamepad.Update();
 
 		while (IsOperatorControl() && IsEnabled())
 		{
+			controls = Controls::GetInstance();
+			
+			controls->SetSpeed(LEFT_DRIVE_PWM, -1.0 * gamepad.GetRightY());
+			controls->SetSpeed(RIGHT_DRIVE_PWM, -1.0 * gamepad.GetRightY());
+			
+			gamepad.Update();
+			
 			dsLCD->Clear();
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line1, "2013 Test Fix");
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line2, "Teleop Mode");
@@ -71,13 +97,14 @@ public:
 			{
 				bigSanity++;
 			}
-			Wait(1.0);				// wait for a motor update time
+
+			Wait(0.05);				// wait for a motor update time
 		}
 	}
-	
+
 	/**
-	 * Run the test program
-	 */
+	* Run the test program
+	*/
 	// The test program is organized as a set of hierarchical menus that are
 	// displayed on the LCD on the driver station. Each menu is either a set
 	// of submenus or is a menu controlling the use of a port (or ports) on 
@@ -93,14 +120,14 @@ public:
 	//             enter a submenu (as appropriate)
 	// gamepad right joystick: control the configured and enabled PWM ports
 	//               (Top->Digital->PWM)
-	
-	void Test() 
+
+	void Test()
 	{
 		menuType currentMenu = TOP;
-		menuType newMenu     = TOP;
-		
+		menuType newMenu = TOP;
+
 		BaseMenu * menus[NUM_MENU_TYPE];
-		
+
 		menus[TOP] = new TopMenu;
 		menus[ANALOG] = new AnalogMenu;
 		menus[DIGITAL_TOP] = new DigitalMenu;
@@ -114,14 +141,14 @@ public:
 
 		// Write out the TOP menu for the first time
 		menus[currentMenu]->UpdateDisplay();
-		
+
 		// Initialize the button states on the gamepad
 		gamepad.Update();
-		
+
 		// Loop counter to ensure that the program us running (debug helper
 		// that can be removed when things get more stable)
 		int sanity = 0;
-	
+
 		while (IsTest())
 		{
 			// The dpad "up" button is used to move the menu pointer up one line
@@ -130,14 +157,14 @@ public:
 			{
 				menus[currentMenu]->HandleIndexUp();
 			}
-			
+
 			// The dpad "down" button is used to move the menu pointer down one line
 			// on the LCD display
 			if (kEventClosed == gamepad.GetDPadEvent(Gamepad::kDown))
 			{
 				menus[currentMenu]->HandleIndexDown();
-			} 
-			
+			}
+
 			// The dpad left button is used to exit a submenu when the menu pointer
 			// points to the "back" menu item and to decrease a value (where 
 			// appropriate) on any other menu item.
@@ -145,20 +172,20 @@ public:
 			{
 				newMenu = menus[currentMenu]->HandleSelectLeft();
 			}
-			
+
 			// Theoretically, both the select buttons could be pressed in the 
 			// same 10 msec window. However, if using the dpad on the game 
 			// game controller this is physically impossible so we don't
 			// need to worry about a previous value of newMenu being 
 			// overwritten in the next bit of code.
-			
+
 			// The dpad right button is used to enter a submenu when the menu pointer
 			// points to a submenu item and to increase a value (where  appropriate) 
 			// on any other menu item.
 			if (kEventClosed == gamepad.GetDPadEvent(Gamepad::kRight))
 			{
 				newMenu = menus[currentMenu]->HandleSelectRight();
-				
+
 				// Handle change from one menu to a sub menu
 				if (newMenu != currentMenu)
 				{
@@ -168,7 +195,7 @@ public:
 					menus[newMenu]->SetCallingMenu(currentMenu);
 				}
 			}
-			
+
 			// Handle change from one menu to another
 			if (newMenu != currentMenu)
 			{
@@ -178,21 +205,21 @@ public:
 
 			// Set the motor speed(s) (if any have been enabled via the Digital PWM menu)
 			menus[DIGITAL_PWM]->SetSpeed(-1.0 * gamepad.GetRightY());
-			
+
 			// Update gamepad button states
 			gamepad.Update();
-			
+
 			// Update the display (we do this on every loop pass because some menus
 			// (analog, for example) need to have values updated even when there are
 			// no dpad events to handle)
 			menus[currentMenu]->UpdateDisplay();
-			
+
 			// Dump the sanity time value to the LCD
 			dsLCD->PrintfLine(DriverStationLCD::kUser_Line6, "Sanity: %d", sanity);
 			dsLCD->UpdateLCD();
-			
+
 			sanity++;
-			
+
 			// Run the loop every 50 msec (20 times per second)
 			Wait(0.050);
 		}

@@ -1,4 +1,4 @@
-#include "base.h"
+#include "digitalIOEncoder.h"
 
 // Digitial IO encoder Menu
 	
